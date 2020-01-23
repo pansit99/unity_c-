@@ -1,0 +1,91 @@
+using UnityEngine;
+using System;
+
+public class movement_001 : MonoBehaviour
+{
+    public Rigidbody rb_player;
+    public GameObject player_cam;
+    public float dist_;
+    public float force_horizontal;
+    public float force_jump;
+    public float cam_theta_XZ;
+    [Range (-90,90)]
+    public float cam_theta_Y;
+    public float cam_sensitivity;
+    void Start()
+    {
+        SetCamera();   
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        Debug.Log(cam_theta_XZ);
+        UpdCamera();
+        controls_update();
+    }
+    void SetCamera()
+    {
+        Vector3 pos_;
+        pos_.x = rb_player.position.x;
+        pos_.y = rb_player.position.y + 2;
+        pos_.z = rb_player.position.z + dist_;
+        player_cam.transform.position = pos_;
+    }
+    void UpdCamera()
+    {
+        double x_;
+        double z_;
+        double y_;
+        x_ = dist_ * Math.Sin(cam_theta_XZ * (Math.PI / 180));
+        z_ = dist_ * Math.Cos(cam_theta_XZ * (Math.PI / 180));
+        y_ = dist_ * Math.Sin(cam_theta_Y * (Math.PI / 180));
+        Vector3 cam_pos;
+        cam_pos.x = (float)x_ + rb_player.position.x;
+        cam_pos.z = (float)z_ + rb_player.position.z;
+        cam_pos.y = (float)y_ + rb_player.position.y;
+        player_cam.transform.position = cam_pos;
+        player_cam.transform.LookAt(rb_player.transform);
+    }
+    void controls_update()
+    {
+        if (Input.GetKey("w"))
+        {
+            rb_player.AddForce(0, 0, -1 * force_horizontal);
+        };
+        if (Input.GetKey("s"))
+        {
+            rb_player.AddForce(0, 0, force_horizontal);
+        };
+        if (Input.GetKey("a"))
+        {
+            rb_player.AddForce(force_horizontal, 0, 0);
+        };
+        if (Input.GetKey("d"))
+        {
+            rb_player.AddForce(-1 * force_horizontal, 0, 0);
+        };
+        if (Input.GetKeyDown("space"))
+        {
+            rb_player.AddForce(0, force_jump, 0);
+        };
+
+        //FOR MOUSE INPUTS
+        if (Input.GetAxis("Mouse X") != 0)
+        {
+            //IN DEGREES
+            cam_theta_XZ = cam_theta_XZ + (Input.GetAxis("Mouse X") * cam_sensitivity);
+        }
+        if (Input.GetAxis("Mouse Y") != 0)
+        {
+            //IN DEGREES
+            cam_theta_Y = cam_theta_Y + (Input.GetAxis("Mouse Y") * cam_sensitivity);
+        }
+    }
+    public float Theta_XZ(Vector3 player_pos, Vector3 player_cam)
+    {
+        double ans_;
+        ans_ = (180 / Math.PI) * Math.Atan((player_pos.x - player_cam.x) / (player_cam.z - player_pos.z));
+        return (float)ans_;
+    }
+}
