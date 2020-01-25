@@ -1,0 +1,44 @@
+using UnityEngine;
+using System;
+
+public class movement_001 : MonoBehaviour
+{
+    public Rigidbody rb_player;
+    public float force_horizontal;
+    public float force_jump;
+    void Start()
+    {  
+
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        //UpdCamera();
+        controls_update();
+    }
+    void controls_update()
+    {
+        if (Input.GetKey("w"))
+        {
+            rb_player.AddForce(0, 0, -1 * force_horizontal);
+        };
+        if (Input.GetKey("s"))
+        {
+            rb_player.AddForce(0, 0, force_horizontal);
+        };
+        if (Input.GetKey("a"))
+        {
+            rb_player.AddForce(force_horizontal, 0, 0);
+        };
+        if (Input.GetKey("d"))
+        {
+            rb_player.AddForce(-1 * force_horizontal, 0, 0);
+        };
+        if (Input.GetKeyDown("space"))
+        {
+            rb_player.AddForce(0, force_jump, 0);
+        };
+    }
+    
+}
