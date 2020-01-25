@@ -1,0 +1,27 @@
+using UnityEngine;
+using UnityEngine.UI;
+
+public class ui_camera : MonoBehaviour
+{
+    public Camera cam_;
+    private camera_script cam_script;
+    public Text txt_cam_pos;
+    public Text angle_horizontal;
+    public Text angle_vertical;
+    public Text angle_lowerlimit;
+    public Text offset_lnt;
+    // Update is called once per frame
+    void Update()
+    {
+        txt_cam_pos.text = "CAM POS :" + cam_.transform.localPosition.ToString();
+        angle_horizontal.text = "THETA XZ :" + cam_script.cam_theta_XZ.ToString();
+        angle_vertical.text = "THETA XZY :" + cam_script.cam_theta_XYZ.ToString();
+        angle_lowerlimit.text = "THETA XZY LOWER LIMIT :" + cam_script.cam_theta_XYZ_lower.ToString();
+        offset_lnt.text = "OFFSET LENGTH :" + cam_script.offset_.ToString();
+    }
+
+    private void Start()
+    {
+        cam_script = cam_.GetComponent<camera_script>();
+    }
+}
