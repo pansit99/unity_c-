@@ -12,7 +12,6 @@ public class camera_script : MonoBehaviour
     public float cam_theta_XYZ_upper;
     public float cam_theta_XYZ_lower;
     public float cam_sensitivity;
-    public float cam_interruption = 100f;
     // Start is called before the first frame update
     void Start()
     {
@@ -51,7 +50,7 @@ public class camera_script : MonoBehaviour
         cam_pos.x = (float)x_ + target_.position.x;
         cam_pos.z = (float)z_ + target_.position.z;
         cam_pos.y = (float)y_ + target_.position.y;
-        transform.position = cam_pos;
+        transform.position = Vector3.Lerp(transform.position, cam_pos, Time.deltaTime * cam_sensitivity);
         transform.LookAt(target_);
     }
 
@@ -75,62 +74,47 @@ public class camera_script : MonoBehaviour
                 cam_theta_XYZ = cam_theta_XYZ_upper - 1;
             }
             cam_theta_XYZ = cam_theta_XYZ - (Input.GetAxis("Mouse Y") * cam_sensitivity);
-            /*
-            if(cam_theta_XYZ < 0 && offset_ > offset_B)
-            {
-                Debug.Log("Angle is lower");
-                offset_ = (offset_A - offset_B) * ((Math.Abs(cam_theta_XYZ_lower) - Math.Abs(cam_theta_XYZ)) / Math.Abs(cam_theta_XYZ_lower));
-            }
-            */
         }
-        //CAMERA ADJUST IF OUT OF BOUNDS
-        /*
-        if (offset_ < offset_B)
-        {
-            offset_ = Mathf.Lerp(offset_, offset_B, Time.deltaTime * 3);
-        }
-        */
         if (cam_theta_XYZ < cam_theta_XYZ_lower)
         {
             cam_theta_XYZ = Mathf.Lerp(cam_theta_XYZ, cam_theta_XYZ_lower + 1, Time.deltaTime * 3);
-        }
-        
-        if(cam_interruption > 0f)
-        {
-            if (offset_ > offset_B)
-            {
-                offset_ = Mathf.Lerp(offset_, offset_ - 3, Time.deltaTime * 3);
-            }
-        }
-        else if(cam_interruption <= 0f)
-        {
-            if(offset_ < offset_A)
-            {
-                offset_ = Mathf.Lerp(offset_, offset_ + 3, Time.deltaTime * 3);
-            }
         }
     }
 
     void occlusion_raycast()
     {
-        Ray ray_ = new Ray(transform.position, transform.TransformDirection(Vector3.forward));
+        Ray ray_ = new Ray(target_.transform.position, (transform.position - target_.position).normalized);
         RaycastHit hit_;
-        int layerMask = 1;
         Color color_;
         float ray_distance = Vector3.Distance(transform.position, target_.transform.position);
-        Debug.Log("RAY DISTANCE: " + ray_distance.ToString() + "interruption timer: " + cam_interruption.ToString("0.00"));
+        Debug.Log("RAY DISTANCE: " + ray_distance.ToString());
         color_ = Color.green;
-        if (Physics.Raycast(ray_, out hit_, ray_distance, layerMask))
+        if (Physics.Raycast(ray_, out hit_, offset_A, 9))
         {
-            Debug.Log("Hit : " + hit_.collider.name + "; cam_interruption: " + cam_interruption.ToString());
-            cam_interruption = 100f;
+            Debug.Log("Hit : " + hit_.collider.name + "; hit_distance: " + hit_.distance.ToString());
             color_ = Color.red;
+            if(hit_.distance <= offset_A && hit_.distance >= offset_A * 0.75f)
+            {
+                offset_ = offset_A * 0.75f;
+            }
+            if (hit_.distance < offset_A * 0.75f && hit_.distance >= offset_A * 0.5f)
+            {
+                offset_ = offset_A * 0.5f;
+            }
+            if (hit_.distance < offset_A * 0.5f && hit_.distance >= offset_A * 0.25f)
+            {
+                offset_ = offset_A * 0.25f;
+            }
+            if (hit_.distance < offset_A * 0.25f)
+            {
+                offset_ = 0.1f;
+            }
         }
         else
         {
-            cam_interruption = cam_interruption - 1f;
+            offset_ = offset_A;
         }
-        Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * ray_distance, color_);
+        Debug.DrawRay(target_.transform.position, (transform.position - target_.position).normalized * offset_, color_);
     }
     
 }
